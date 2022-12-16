@@ -1,7 +1,6 @@
 {
     "name": "simple starter Workflow",
     "description": "simple starter Workflow.",
-    "iconName": "example-icon",
     "categories": [
         "JavaScript"
     ],
