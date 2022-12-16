@@ -3,8 +3,7 @@
     "description": "simple starter Workflow.",
     "iconName": "example-icon",
     "categories": [
-        "js",
-        "node"
+        "JavaScript"
     ],
     "filePatterns": [
         "package.json$",
