@@ -1,6 +1,6 @@
 {
-    "name": "simple starter Workflow",
-    "description": "simple starter Workflow.",
+    "name": "Caller Workflow - Build",
+    "description": "Caller workflow template for build.",
     "filePatterns": [
         "package.json$",
         "^Dockerfile",
