@@ -1,0 +1,12 @@
+{
+    "name": "simple starter Workflow",
+    "description": "simple starter Workflow.",
+    "categories": [
+        "JavaScript"
+    ],
+    "filePatterns": [
+        "package.json$",
+        "^Dockerfile",
+        ".*\\.md$"
+    ]
+}

@@ -1,0 +1,55 @@
+name: 'caller workflow template - Build'
+
+on:
+  # pull_request:
+  push:
+    branch:
+      - <Branch> #INPUT- Branch on which the push event is triggered
+  workflow_dispatch:
+    inputs:
+      TestInputString: #Test string parameter
+        description: "Test String Input "
+        required: true
+        type: string
+
+env:
+  NEXUS_GROUP_REGISTRY: "https://packages.common.cnxloyalty.com/repository/npm-group"
+  NEXUS_REGISTRY: "https://packages.common.cnxloyalty.com/repository/"
+  CHANGED_SDK: <CHANGED_SDK> #INPUT: BASH array of SDK packages e.g. ("@orxe-sdk/configurations-wrapper" "@orxe-core/shell-sdk" "@orxe-core/trips-notification-sdk")
+
+jobs:
+  prereq:
+    runs-on: [self-hosted, test-large-runner] #ubuntu-latest
+    steps:
+      - name: Get ECR password
+        id: pass
+        run: |
+          AWS_PASSWORD=$(aws ecr get-login-password --region us-east-1)
+          echo "AWS_PASSWORD=$AWS_PASSWORD" >> $GITHUB_OUTPUT
+      - name: Load JSON
+        id: sdk-json
+        shell: bash
+        run: |
+          declare -a CHANGED_SDK_ARR=$CHANGED_SDK
+          echo ${CHANGED_SDK_ARR[@]}
+          CHANGED_SDK_JSON=$(printf '%s\n' "${CHANGED_SDK_ARR[@]}" | jq -R . | jq -s . | jq -c .)
+          echo $CHANGED_SDK_JSON
+          echo "CHANGED_SDK_JSON='$CHANGED_SDK_JSON'" >> $GITHUB_OUTPUT       
+    outputs:
+      aws_password: ${{ steps.pass.outputs.AWS_PASSWORD }}
+      changed_sdk_json: ${{ steps.sdk-json.outputs.CHANGED_SDK_JSON }}
+
+  call_build_workflow:
+    needs:
+      - prereq
+    uses: taviscasolutions-poc/poc-shared-workflow/.github/workflows/shared-workflow.yaml@main 
+    with:
+      runner: '["self-hosted", "test-large-runner"]'
+      image: <ECR_IMAGE> #INPUT: EXR Imaged to use e.g. '534793743635.dkr.ecr.us-east-1.amazonaws.com/sdlc-apps-base-images:orxe-core-benefits-node-14-v1'
+      ecr_password: ${{ needs.prereq.outputs.aws_password }}
+      branch: <BRANCH> #INPUT: branch to used for build e.g. 'orxe-gitworkflow-poc'
+      package_list_sdk: '["@orxe-sdk/configurations-wrapper","@orxe-core/shell-sdk","@orxe-core/trips-notification-sdk"]'
+      package_list_microapps: '["desktop-deal-pages", "desktop-home", "desktop-profile", "mobile-authentication", "mobile-deal-pages", "mobile-home", "mobile-profile"]'
+    secrets: inherit
+
+#test11
